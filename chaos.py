@@ -1,4 +1,4 @@
-ajub = 1 
+ajub = 1
 mo = 42
-ali = 1 
+ali = 4
 olith = 1 
