@@ -1,0 +1,36 @@
+#Luftqualität-API
+
+import requests
+
+def get_air_quality(latitude, longitude):
+    url = (
+        "https://air-quality-api.open-meteo.com/v1/air-quality"
+        f"?latitude={latitude}&longitude={longitude}"
+        "&current=pm10,pm2_5,nitrogen_dioxide,ozone"
+    )
+
+    try:
+        response = requests.get(url, timeout=10)
+        response.raise_for_status()  # Wirft Fehler bei HTTP-Problemen
+        
+        data = response.json()
+        current = data.get("current", {})
+
+        print("\n--- Aktuelle Luftqualität ---")
+        print(f"Ort (Lat, Lon): {latitude}, {longitude}")
+        print(f"PM10: {current.get('pm10', 'N/A')} µg/m³")
+        print(f"PM2.5: {current.get('pm2_5', 'N/A')} µg/m³")
+        print(f"NO₂: {current.get('nitrogen_dioxide', 'N/A')} µg/m³")
+        print(f"Ozon: {current.get('ozone', 'N/A')} µg/m³")
+        print("-----------------------------\n")
+
+    except requests.exceptions.RequestException as e:
+        print("Fehler bei der API-Anfrage:", e)
+
+
+if __name__ == "__main__":
+    # Beispiel : Hamburg 
+    latitude = 53.55
+    longitude = 9.99
+
+    get_air_quality(latitude, longitude)
