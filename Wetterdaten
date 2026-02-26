@@ -1,0 +1,115 @@
+import requests
+import random
+import time
+
+
+def geocode_place(name):
+    url = f"https://geocoding-api.open-meteo.com/v1/search?name={name}&count=1"
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+
+    if "results" not in data:
+        return None
+
+    result = data["results"][0]
+    return {
+        "latitude": result["latitude"],
+        "longitude": result["longitude"],
+        "country": result.get("country", "Unknown"),
+        "feature_code": result.get("feature_code", ""),
+        "bbox": result.get("boundingbox", None)
+    }
+
+
+def get_current_temperature(lat, lon):
+    url = (
+        "https://api.open-meteo.com/v1/forecast"
+        f"?latitude={lat}&longitude={lon}"
+        "&current=temperature_2m"
+    )
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    return data["current"]["temperature_2m"]
+
+
+def get_historical_temperature(lat, lon, date):
+    url = (
+        "https://archive-api.open-meteo.com/v1/archive"
+        f"?latitude={lat}&longitude={lon}"
+        f"&start_date={date}&end_date={date}"
+        "&daily=temperature_2m_mean"
+    )
+    response = requests.get(url, timeout=10)
+    response.raise_for_status()
+    data = response.json()
+    return data["daily"]["temperature_2m_mean"][0]
+
+
+# =========================
+# INPUT
+# =========================
+
+name = input("Enter a city or country name: ").strip()
+date = input("Enter a date (YYYY-MM-DD) or press Enter for current temperature: ").strip()
+
+location = geocode_place(name)
+
+if not location:
+    print("Location not found.")
+    exit()
+
+lat = location["latitude"]
+lon = location["longitude"]
+country = location["country"]
+feature_code = location["feature_code"]
+bbox = location["bbox"]
+
+
+# CITY
+if not feature_code.startswith("PCL"):
+    if date == "":
+        temp = get_current_temperature(lat, lon)
+        print(f"\nCurrent temperature in {name} ({country}): {temp}°C\n")
+    else:
+        temp = get_historical_temperature(lat, lon, date)
+        print(f"\nMean temperature in {name} on {date}: {temp}°C\n")
+
+
+# COUNTRY
+else:
+    if not bbox:
+        print("No geographic boundary data available.")
+        exit()
+
+    lat_min, lat_max, lon_min, lon_max = map(float, bbox)
+    samples = 15
+    values = []
+
+    print(f"\nCalculating approximate average temperature for {name}...\n")
+
+    for _ in range(samples):
+        rand_lat = random.uniform(lat_min, lat_max)
+        rand_lon = random.uniform(lon_min, lon_max)
+
+        try:
+            if date == "":
+                value = get_current_temperature(rand_lat, rand_lon)
+            else:
+                value = get_historical_temperature(rand_lat, rand_lon, date)
+
+            values.append(value)
+            time.sleep(0.3)
+
+        except:
+            pass
+
+    if values:
+        avg = sum(values) / len(values)
+        if date == "":
+            print(f"Approximate current average temperature in {name}: {avg:.2f}°C\n")
+        else:
+            print(f"Approximate mean temperature in {name} on {date}: {avg:.2f}°C\n")
+    else:
+        print("No data available.")
