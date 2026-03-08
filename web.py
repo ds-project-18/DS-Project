@@ -9,7 +9,7 @@ import os
 # --- PAGE SETUP ---
 st.set_page_config(page_title="Inflation Impact Analysis", page_icon="📈", layout="wide", initial_sidebar_state="expanded")
 
-# --- CUSTOM CSS (Optional for subtle visual tweaks) ---
+# --- CUSTOM CSS ---
 st.markdown("""
     <style>
     .stMetric {
@@ -40,7 +40,7 @@ with st.sidebar:
     st.markdown("- Macro Interactions")
     st.markdown("- Project Summary")
 
-# --- HEADER & DETAILED TOPIC INTRODUCTION ---
+# --- HEADER ---
 st.title("📊 Media, Public Interest & Inflation in Germany")
 
 with st.expander("📖 Executive Summary: About This Project", expanded=True):
