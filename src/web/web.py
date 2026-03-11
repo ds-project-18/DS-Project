@@ -5,6 +5,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import numpy as np
 import os
+from pathlib import Path
 
 # --- PAGE SETUP ---
 st.set_page_config(page_title="Inflation Impact Analysis", page_icon="📈", layout="wide", initial_sidebar_state="expanded")
@@ -56,19 +57,20 @@ with st.expander("📖 Executive Summary: About This Project", expanded=True):
     """)
 
 # --- DATA LOADING & CLEANING ---
+
+BASE_DIR = Path(__file__).resolve().parents[2]
+DATA_DIR = BASE_DIR / "data" / "processed"
+
 @st.cache_data
 def load_data():
     try:
-        energy_file = "energy.csv" if os.path.exists("energy.csv") else "ernergy_cost.csv"
-        news_file = "news_monthly.csv" if os.path.exists("news_monthly.csv") else "gnews_monthly_inflation_DE_2022_2023.csv"
-        labour_file = "labour.csv" if os.path.exists("labour.csv") else "unemployment_rate_2022_2024.csv"
 
-        df_inflation = pd.read_csv("inflation.csv")
-        df_energy = pd.read_csv(energy_file)
-        df_food = pd.read_csv("food.csv")
-        df_labour = pd.read_csv(labour_file)
-        df_news = pd.read_csv(news_file)
-        df_trends = pd.read_csv("trends_monthly.csv")
+        df_inflation = pd.read_csv(DATA_DIR / "inflation.csv")
+        df_energy = pd.read_csv(DATA_DIR / "energy.csv")
+        df_food = pd.read_csv(DATA_DIR / "food.csv")
+        df_labour = pd.read_csv(DATA_DIR / "labour.csv")
+        df_news = pd.read_csv(DATA_DIR / "news_monthly.csv")
+        df_trends = pd.read_csv(DATA_DIR / "trends_monthly.csv")
 
         df_inflation['Date'] = pd.to_datetime(df_inflation['month'])
         df_energy['Date'] = pd.to_datetime(df_energy['time'])
@@ -95,7 +97,7 @@ def load_data():
         st.stop()
 
 df = load_data()
-
+    
 # --- KPI METRICS ROW ---
 st.markdown("### ⚡ Crisis at a Glance (2022 - 2024)")
 m1, m2, m3, m4 = st.columns(4)
