@@ -1,4 +1,11 @@
+<<<<<<< HEAD
 streamlit
 pandas
 plotly
 numpy
+=======
+numpy==2.2.6
+pandas==2.2.3
+plotly==5.24.1
+streamlit==1.45.1
+>>>>>>> 03de169b1ae6dacaf48aa80100c988107529ded7
