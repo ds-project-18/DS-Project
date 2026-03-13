@@ -21,70 +21,19 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-<<<<<<< HEAD:web.py
 # --- DATA LOADING & CLEANING (SUPER-BULLETPROOF) ---
-=======
-# --- SIDEBAR (Clean up the main page) ---
-with st.sidebar:
-    st.title("👨‍💻 Team")
-    st.info("""
-    **Data Science Project 2026**
-    
-    *Members:*
-    - Ali
-    - Ajub
-    - Olith
-    - Mohamed 
-    """)
-    st.markdown("---")
-    st.markdown("### 📌 Navigation")
-    st.markdown("- Media & Attention")
-    st.markdown("- Inflation vs. Trends")
-    st.markdown("- Energy & Food Prices")
-    st.markdown("- Macro Interactions")
-    st.markdown("- Project Summary")
-
-# --- HEADER ---
-st.title("📊 Media, Public Interest & Inflation in Germany")
-
-with st.expander("📖 Executive Summary: About This Project", expanded=True):
-    st.markdown("""
-    **The Context:** Starting in early 2022, global exogenous shocks (primarily the European energy crisis and supply chain disruptions) triggered historic inflation rates in Germany, peaking at over 11% in autumn 2022. This period placed immense financial pressure on households and businesses alike.
-
-    **Our Research Focus:** While traditional economics only looks at numbers, this project bridges the gap between **hard economic indicators** (inflation rates, energy prices, food prices, unemployment) and **public psychology**. We analyze:
-    1. **The Media's Role:** How did news coverage shape public anxiety?
-    2. **Public Attention:** How did the German population react, measured through their real-time Google search behavior for terms like "Inflation", "Energy costs", and "Cost of living"?
-    3. **Macroeconomic Interactions:** Did actual price hikes drive public panic, or was it primarily media-induced? And how resilient was the labor market during this storm?
-
-    **Methodology:** We aggregate multiple datasets (Statistisches Bundesamt, Google Trends, GDELT News) into a monthly format. By visualizing these complex relationships, we aim to answer 9 specific research questions to understand how an economic crisis unfolds in the public consciousness.
-    """)
-
-# --- DATA LOADING & CLEANING ---
-
 BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data" / "processed"
-
->>>>>>> 03de169b1ae6dacaf48aa80100c988107529ded7:src/web/web.py
 @st.cache_data
 def load_data():
     try:
 
-<<<<<<< HEAD:web.py
-        # FIXED: Added "sep=None, engine='python'" to automatically detect Commas vs. Semicolons!
-        df_inflation = pd.read_csv("inflation.csv", sep=None, engine='python')
-        df_energy = pd.read_csv(energy_file, sep=None, engine='python')
-        df_food = pd.read_csv("food.csv", sep=None, engine='python')
-        df_labour = pd.read_csv(labour_file, sep=None, engine='python')
-        df_news = pd.read_csv(news_file, sep=None, engine='python')
-        df_trends = pd.read_csv("trends_monthly.csv", sep=None, engine='python')
-=======
         df_inflation = pd.read_csv(DATA_DIR / "inflation.csv")
         df_energy = pd.read_csv(DATA_DIR / "energy.csv")
         df_food = pd.read_csv(DATA_DIR / "food.csv")
         df_labour = pd.read_csv(DATA_DIR / "labour.csv")
         df_news = pd.read_csv(DATA_DIR / "news_monthly.csv")
         df_trends = pd.read_csv(DATA_DIR / "trends_monthly.csv")
->>>>>>> 03de169b1ae6dacaf48aa80100c988107529ded7:src/web/web.py
 
         # SMART DATE FINDER: Automatically detects the date column regardless of name/capitalization
         def find_and_convert_date(df):
@@ -122,7 +71,6 @@ def load_data():
         st.stop()
 
 df = load_data()
-<<<<<<< HEAD:web.py
 
 bg_color = 'rgba(128, 128, 128, 0.3)'
 
@@ -145,17 +93,6 @@ with st.sidebar:
         "📊 Interactive Dashboard", 
         "🎯 Project Summary"
     ])
-=======
-    
-# --- KPI METRICS ROW ---
-st.markdown("### ⚡ Crisis at a Glance (2022 - 2024)")
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("Peak Inflation Rate", f"{df['inflation_rate'].max()}%", "Oct 2022", delta_color="inverse")
-m2.metric("Peak Energy Index", f"{df['energy_price_index'].max():.1f}", "Nov 2022", delta_color="inverse")
-m3.metric("Highest News Volume", f"{df['news_count'].max():.0f} Articles", "Sep 2022", delta_color="inverse")
-m4.metric("Avg Unemployment", f"{df['unemployment_rate'].mean():.1f}%", "Highly Stable", delta_color="normal")
-st.markdown("---")
->>>>>>> 03de169b1ae6dacaf48aa80100c988107529ded7:src/web/web.py
 
 layout_template = "plotly_white"
 
