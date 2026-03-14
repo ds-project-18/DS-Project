@@ -7,9 +7,11 @@ import numpy as np
 import os
 from pathlib import Path
 
+
 # --- PAGE SETUP ---
 st.set_page_config(page_title="Inflation Impact Analysis", page_icon="📈", layout="wide", initial_sidebar_state="expanded")
 
+# --- CUSTOM CSS ---
 # --- CUSTOM CSS ---
 st.markdown("""
     <style>
@@ -18,8 +20,71 @@ st.markdown("""
         padding: 15px;
         border-radius: 10px;
     }
+
+    /* Bigger paragraph text */
+    .stMarkdown p, .stMarkdown li, .stAlert p {
+        font-size: 1.08rem !important;
+        line-height: 1.65 !important;
+    }
+
+    h1, h2, h3 {
+        line-height: 1.25 !important;
+    }
     </style>
     """, unsafe_allow_html=True)
+
+# --- THEME-SAFE COLORS ---
+COLORS = {
+    "news_fill": "rgba(181, 101, 29, 0.22)",      # light brown, works in light/dark
+    "news_line": "rgba(181, 101, 29, 0.95)",
+    "inflation": "#3b82f6",
+    "energy": "#f59e0b",
+    "cost": "#22c55e",
+    "official": "#ef4444",
+    "food_fill": "rgba(34, 197, 94, 0.20)",
+    "food_line": "#22c55e",
+    "decay": "rgba(239, 68, 68, 0.12)"
+}
+
+layout_template = "streamlit"
+
+# --- LABEL CLEANER ---
+LABELS = {
+    "news_count": "News Count",
+    "inflation_rate": "Inflation Rate (%)",
+    "energy_price_index": "Energy Price Index (index points)",
+    "food_price_index": "Food Price Index (index points)",
+    "unemployment_rate": "Unemployment Rate (%)",
+    "Inflation": "Google Trends: Inflation",
+    "Energiekosten": "Google Trends: Energy Costs",
+    "Lebenshaltungskosten": "Google Trends: Cost of Living",
+    "news_count_lag1": "News Count (t-1)"
+}
+
+def clean_label(name):
+    return LABELS.get(name, name.replace("_", " ").title())
+
+def add_trendline_and_corr(fig, x, y, x_name, y_name, color="#94a3b8"):
+    tmp = pd.DataFrame({x_name: x, y_name: y}).dropna()
+    if len(tmp) > 1:
+        r = tmp[x_name].corr(tmp[y_name])
+        m, b = np.polyfit(tmp[x_name], tmp[y_name], 1)
+        x_line = np.linspace(tmp[x_name].min(), tmp[x_name].max(), 100)
+        y_line = m * x_line + b
+        fig.add_trace(go.Scatter(
+            x=x_line,
+            y=y_line,
+            mode="lines",
+            name=f"Trendline (r = {r:.2f})",
+            line=dict(color=color, dash="dash")
+        ))
+        fig.add_annotation(
+            xref="paper", yref="paper", x=0.02, y=0.98,
+            text=f"Pearson r = {r:.2f}",
+            showarrow=False,
+            bgcolor="rgba(0,0,0,0.05)"
+        )
+    return fig
 
 # --- DATA LOADING & CLEANING (SUPER-BULLETPROOF) ---
 BASE_DIR = Path(__file__).resolve().parents[2]
@@ -125,9 +190,9 @@ elif page == "📊 Interactive Dashboard":
     
     st.markdown("### ⚡ Crisis at a Glance (2022 - 2024)")
     m1, m2, m3, m4 = st.columns(4)
-    m1.metric("Peak Inflation Rate", f"{df['inflation_rate'].max()}%", "Oct 2022", delta_color="inverse")
-    m2.metric("Peak Energy Index", f"{df['energy_price_index'].max():.1f}", "Nov 2022", delta_color="inverse")
-    m3.metric("Highest News Volume", f"{df['news_count'].max():.0f} Articles", "Sep 2022", delta_color="inverse")
+    m1.metric("Peak Inflation Rate", f"{df['inflation_rate'].max():.1f}%", "Oct 2022", delta_color="inverse")
+    m2.metric("Peak Energy Index", f"{df['energy_price_index'].max():.1f} index pts", "Nov 2022", delta_color="inverse")
+    m3.metric("Highest News Volume", f"{df['news_count'].max():.0f} articles", "Sep 2022", delta_color="inverse")
     m4.metric("Avg Unemployment", f"{df['unemployment_rate'].mean():.1f}%", "Highly Stable", delta_color="normal")
     st.markdown("---")
 
@@ -140,39 +205,72 @@ elif page == "📊 Interactive Dashboard":
 
     # --- TAB 1: MEDIA & PUBLIC ATTENTION ---
     with tab1:
+        
+         
         with st.container(border=True):
             st.subheader("Q1: Relationship between news articles mentioning 'Inflation' and Google Trends for 'Inflation'")
-            col1_1, col1_2 = st.columns(2)
-            
-            with col1_1:
-                available_years = ["All Years"] + sorted(df['Year'].unique().tolist())
-                selected_year = st.selectbox("Select Timeline for Correlation:", available_years, key="q1_year_select")
-                
-                df_q1 = df.copy()
-                if selected_year != "All Years":
-                    df_q1 = df_q1[df_q1['Year'] == selected_year]
-                
-                if len(df_q1.dropna(subset=['news_count', 'Inflation'])) > 1:
-                    corr_value = df_q1['news_count'].corr(df_q1['Inflation'])
-                    corr_text = f"(r = {corr_value:.2f})"
-                else:
-                    corr_text = "(Not enough data)"
 
-                fig1a = px.scatter(df_q1, x="news_count", y="Inflation", 
-                                  color="Year" if selected_year == "All Years" else None,
-                                  title=f"1a: Scatter Plot Correlation {corr_text}",
-                                  labels={"news_count": "News Articles", "Inflation": "Google Trends 'Inflation'"})
+            available_years = ["All Years"] + sorted(df['Year'].unique().tolist())
+            selected_year = st.selectbox("Select Timeline for Correlation:", available_years, key="q1_year_select")
+
+            df_q1 = df.copy()
+            if selected_year != "All Years":
+                df_q1 = df_q1[df_q1['Year'] == selected_year]
+
+            if len(df_q1.dropna(subset=['news_count', 'Inflation'])) > 1:
+                corr_value = df_q1['news_count'].corr(df_q1['Inflation'])
+                corr_text = f"(r = {corr_value:.2f})"
+            else:
+                corr_text = "(Not enough data)"
+
+            col1_1, col1_2 = st.columns(2)
+
+            with col1_1:
+                fig1a = px.scatter(
+                    df_q1,
+                    x="news_count",
+                    y="Inflation",
+                    color="Year" if selected_year == "All Years" else None,
+                    title=f"1a: News Count vs Search Interest {corr_text}",
+                    labels={
+                        "news_count": clean_label("news_count") + " (articles/month)",
+                        "Inflation": clean_label("Inflation") + " (index)"
+                    }
+                )
+                fig1a = add_trendline_and_corr(
+                    fig1a,
+                    df_q1["news_count"],
+                    df_q1["Inflation"],
+                    "news_count",
+                    "Inflation"
+                )
+                fig1a.update_layout(height=430)
                 st.plotly_chart(fig1a, use_container_width=True, theme="streamlit")
-                
+
             with col1_2:
                 fig1b = go.Figure()
-                fig1b.add_trace(go.Scatter(x=df['Date'], y=df['news_count'], name="News Count", fill='tozeroy', marker_color=bg_color, line=dict(color='rgba(0,0,0,0)')))
-                fig1b.add_trace(go.Scatter(x=df['Date'], y=df['Inflation'], name="Search Trends", yaxis='y2', line=dict(color='#1f77b4', width=3)))
-                fig1b.update_layout(title="1b: Simultaneous Peaks over Time", yaxis_title="News Count", yaxis2=dict(title="Trends Index", overlaying='y', side='right'))
+                fig1b.add_trace(go.Scatter(
+                    x=df['Date'], y=df['news_count'],
+                    name="News Count",
+                    fill='tozeroy',
+                    fillcolor=COLORS["news_fill"],
+                    line=dict(color=COLORS["news_line"], width=2)
+                ))
+                fig1b.add_trace(go.Scatter(
+                    x=df['Date'], y=df['Inflation'],
+                    name="Search Interest: Inflation",
+                    yaxis='y2',
+                    line=dict(color=COLORS["inflation"], width=3)
+                ))
+                fig1b.update_layout(
+                    title="1b: Simultaneous Peaks over Time",
+                    yaxis_title="News Count (articles/month)",
+                    yaxis2=dict(title="Google Trends Index", overlaying='y', side='right'),
+                    height=430
+                )
                 st.plotly_chart(fig1b, use_container_width=True, theme="streamlit")
-                
-            st.success("**Answer:** There is a strong positive relationship between media coverage and public search interest. Graph 1a calculates the live mathematical correlation: more news reliably equals more searches. Graph 1b illustrates this over time, showing how public search behavior perfectly shadows the volume of media reporting. Media acts as a massive driver for public awareness.")
-        
+
+            st.success("**Answer:** There is a strong positive relationship between media coverage and public search interest. Graph 1a calculates the live mathematical correlation: more news reliably equals more searches. Graph 1b illustrates this over time, showing how public search behavior closely follows the volume of media reporting. Media acts as a major driver of public awareness.") 
         with st.container(border=True):
             st.subheader("Q2: Does media coverage influence search interest for related terms ('Energy costs' & 'Cost of living')?")
             col2_1, col2_2 = st.columns(2)
@@ -220,12 +318,39 @@ elif page == "📊 Interactive Dashboard":
             col5_1, col5_2 = st.columns(2)
             with col5_1:
                 fig4a = go.Figure()
-                fig4a.add_trace(go.Scatter(x=df['Date'], y=df['news_count'], name="News Count", fill='tozeroy', marker_color=bg_color, line=dict(color='rgba(0,0,0,0)')))
-                fig4a.add_trace(go.Scatter(x=df['Date'], y=df['Inflation'], name="Search Trends", yaxis='y2', line=dict(color='#1f77b4', width=3)))
-                fig4a.update_layout(title="4a: Decay of Public Interest Timeline", yaxis_title="News Count", yaxis2=dict(title="Trends Index", overlaying='y', side='right'))
-                
-                fig4a.add_vrect(x0="2022-11-01", x1="2023-03-01", fillcolor="red", opacity=0.15, line_width=0, annotation_text="Decay Phase", annotation_font_color="red")
+                fig4a.add_trace(go.Scatter(
+                    x=df['Date'], y=df['news_count'],
+                    name="News Count",
+                    fill='tozeroy',
+                    fillcolor=COLORS["news_fill"],
+                    line=dict(color=COLORS["news_line"], width=2)
+                ))
+                fig4a.add_trace(go.Scatter(
+                    x=df['Date'], y=df['Inflation'],
+                    name="Search Interest: Inflation",
+                    yaxis='y2',
+                    line=dict(color=COLORS["inflation"], width=3)
+                ))
+                fig4a.update_layout(
+                    title="4a: Decay of Public Interest Timeline",
+                    yaxis_title="News Count (articles/month)",
+                    yaxis2=dict(title="Google Trends Index", overlaying='y', side='right'),
+                    height=430,
+                    xaxis=dict(
+                        title="Date",
+                        range=["2022-01-01", df['Date'].max()]
+                    )
+                )
+
+                fig4a.add_vrect(
+                    x0="2022-11-01", x1="2023-03-01",
+                    fillcolor=COLORS["decay"], opacity=1,
+                    line_width=0,
+                    annotation_text="Decay Phase",
+                    annotation_font_color="red"
+                )
                 st.plotly_chart(fig4a, use_container_width=True, theme="streamlit")
+            
             with col5_2:
                 if len(df[df['Phase'] != 'Baseline']) > 0:
                     fig4b = px.box(df[df['Phase'] != 'Baseline'], x="Phase", y="Inflation", color="Phase",
@@ -247,11 +372,29 @@ elif page == "📊 Interactive Dashboard":
                 fig5a.update_layout(title="5a: Trajectories over Time", yaxis_title="Inflation Rate (%)", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
                 st.plotly_chart(fig5a, use_container_width=True, theme="streamlit")
             with col3_2:
-                df_q5b = df.dropna(subset=['news_count'])
-                fig5b = px.scatter(df_q5b, x="inflation_rate", y="Inflation", color="Year", size="news_count",
-                                   title="5b: Official Rate vs Trends (Size = News Vol.)",
-                                   labels={"inflation_rate": "Official Inflation Rate (%)", "Inflation": "Trends: Inflation"})
-                st.plotly_chart(fig5b, use_container_width=True, theme="streamlit")
+                df_q5b = df.dropna(subset=['inflation_rate', 'Inflation', 'news_count'])
+                fig5b = px.scatter(
+                    df_q5b,
+                    x="inflation_rate",
+                    y="Inflation",
+                    color="Year",
+                    size="news_count",
+                    title="5b: Official Rate vs Search Interest (bubble size = news volume)",
+                    labels={
+                        "inflation_rate": "Inflation Rate (%)",
+                        "Inflation": "Google Trends: Inflation (index)",
+                        "news_count": "News Count"
+                    }
+                )
+                fig5b = add_trendline_and_corr(
+                    fig5b,
+                    df_q5b["inflation_rate"],
+                    df_q5b["Inflation"],
+                    "inflation_rate",
+                    "Inflation"
+                )
+                fig5b.update_layout(height=430)
+                st.plotly_chart(fig5b, use_container_width=True, theme="streamlit")           
             st.success("**Answer:** They track each other exceptionally well during the escalation phase (2022). Both metrics peaked around October 2022. However, Graph 5a shows that during the disinflation phase in 2023, public search interest dropped much faster than the actual inflation rate. Graph 5b highlights that the highest correlation occurs exactly when news volume (bubble size) is massive.")
 
         with st.container(border=True):
