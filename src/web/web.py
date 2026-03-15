@@ -6,12 +6,11 @@ import plotly.graph_objects as go
 import numpy as np
 import os
 from pathlib import Path
-
+from scipy.stats import pearsonr
 
 # --- PAGE SETUP ---
 st.set_page_config(page_title="Inflation Impact Analysis", page_icon="📈", layout="wide", initial_sidebar_state="expanded")
 
-# --- CUSTOM CSS ---
 # --- CUSTOM CSS ---
 st.markdown("""
     <style>
@@ -89,10 +88,10 @@ def add_trendline_and_corr(fig, x, y, x_name, y_name, color="#94a3b8"):
 # --- DATA LOADING & CLEANING (SUPER-BULLETPROOF) ---
 BASE_DIR = Path(__file__).resolve().parents[2]
 DATA_DIR = BASE_DIR / "data" / "processed"
+
 @st.cache_data
 def load_data():
     try:
-
         df_inflation = pd.read_csv(DATA_DIR / "inflation.csv")
         df_energy = pd.read_csv(DATA_DIR / "energy.csv")
         df_food = pd.read_csv(DATA_DIR / "food.csv")
@@ -205,7 +204,6 @@ elif page == "📊 Interactive Dashboard":
 
     # --- TAB 1: MEDIA & PUBLIC ATTENTION ---
     with tab1:
-        
          
         with st.container(border=True):
             st.subheader("Q1: Relationship between news articles mentioning 'Inflation' and Google Trends for 'Inflation'")
@@ -217,12 +215,6 @@ elif page == "📊 Interactive Dashboard":
             if selected_year != "All Years":
                 df_q1 = df_q1[df_q1['Year'] == selected_year]
 
-            if len(df_q1.dropna(subset=['news_count', 'Inflation'])) > 1:
-                corr_value = df_q1['news_count'].corr(df_q1['Inflation'])
-                corr_text = f"(r = {corr_value:.2f})"
-            else:
-                corr_text = "(Not enough data)"
-
             col1_1, col1_2 = st.columns(2)
 
             with col1_1:
@@ -231,7 +223,7 @@ elif page == "📊 Interactive Dashboard":
                     x="news_count",
                     y="Inflation",
                     color="Year" if selected_year == "All Years" else None,
-                    title=f"1a: News Count vs Search Interest {corr_text}",
+                    title="1a: News Count vs Search Interest",
                     labels={
                         "news_count": clean_label("news_count") + " (articles/month)",
                         "Inflation": clean_label("Inflation") + " (index)"
@@ -270,7 +262,8 @@ elif page == "📊 Interactive Dashboard":
                 )
                 st.plotly_chart(fig1b, use_container_width=True, theme="streamlit")
 
-            st.success("**Answer:** There is a strong positive relationship between media coverage and public search interest. Graph 1a calculates the live mathematical correlation: more news reliably equals more searches. Graph 1b illustrates this over time, showing how public search behavior closely follows the volume of media reporting. Media acts as a major driver of public awareness.") 
+            st.success("**Answer:** There is a strong positive relationship between media coverage and public search interest. Graph 1a explicitly calculates the live mathematical correlation: more news reliably equals more searches. Graph 1b illustrates this over time, showing how public search behavior closely follows the volume of media reporting. Media acts as a major driver of public awareness.") 
+        
         with st.container(border=True):
             st.subheader("Q2: Does media coverage influence search interest for related terms ('Energy costs' & 'Cost of living')?")
             col2_1, col2_2 = st.columns(2)
@@ -281,13 +274,22 @@ elif page == "📊 Interactive Dashboard":
                 fig2a.add_trace(go.Scatter(x=df['Date'], y=df['Lebenshaltungskosten'], name="Trends: Cost of Living", yaxis='y2', line=dict(color='#2ca02c', width=3)))
                 fig2a.update_layout(title="2a: News Volume vs. Related Search Terms", yaxis_title="News Count", yaxis2=dict(title="Google Trends Index", overlaying='y', side='right'))
                 st.plotly_chart(fig2a, use_container_width=True, theme="streamlit")
+            
             with col2_2:
                 trends_sum = df[['Inflation', 'Energiekosten', 'Lebenshaltungskosten']].sum().reset_index()
                 trends_sum.columns = ['Search Term', 'Total Volume']
-                fig2b = px.pie(trends_sum, values='Total Volume', names='Search Term', title="2b: Overall Share of Search Interest", color_discrete_sequence=['#1f77b4', '#ff7f0e', '#2ca02c'])
-                fig2b.update_traces(textposition='inside', textinfo='percent+label')
+                fig2b = px.treemap(
+                    trends_sum, 
+                    path=['Search Term'], 
+                    values='Total Volume', 
+                    title="2b: Overall Share of Search Interest (Treemap)", 
+                    color='Search Term', 
+                    color_discrete_map={'Inflation': '#3b82f6', 'Energiekosten': '#f59e0b', 'Lebenshaltungskosten': '#22c55e'}
+                )
+                fig2b.update_traces(textinfo="label+value+percent root")
                 st.plotly_chart(fig2b, use_container_width=True, theme="streamlit")
-            st.success("**Answer:** The influence is highly significant. Graph 2a shows that spikes in media coverage perfectly align with surges in searches for specific consequences like 'Energiekosten' and 'Lebenshaltungskosten'. The media prompts people to research how macroeconomic issues affect their personal lives. Graph 2b shows that while 'Inflation' and 'Cost of living' dominate the overall volume, 'Energy costs' takes a substantial chunk primarily driven by news peaks.")
+                
+            st.success("**Answer:** The influence is highly evident. Graph 2a shows that spikes in media coverage perfectly align with surges in searches for specific personal consequences. Graph 2b uses a hierarchical Treemap to show the exact proportions: 'Cost of living' (Lebenshaltungskosten) and general 'Inflation' dominate the overall volume, but specific pain points like 'Energy costs' take a substantial chunk that is primarily driven by these news peaks.")
 
         with st.container(border=True):
             st.subheader("Q3: To what extent does media coverage on month t explain variation in search interest on month t+1?")
@@ -298,16 +300,21 @@ elif page == "📊 Interactive Dashboard":
             
             col4_1, col4_2 = st.columns(2)
             with col4_1:
-                fig3a = px.scatter(df, x="news_count_lag1", y="Inflation", color="Year",
-                                  title="3a: Lagged Effect Scatter (News t-1 vs Trends t)",
-                                  labels={"news_count_lag1": "News Articles (Month t-1)", "Inflation": "Trends (Month t)"})
+                fig3a = px.density_heatmap(df, x="news_count_lag1", y="Inflation", nbinsx=15, nbinsy=15,
+                                  title="3a: Density Heatmap (Lagged Spillover Effect)",
+                                  labels={"news_count_lag1": "News Volume (Month t-1)", "Inflation": "Search Panic (Month t)"},
+                                  color_continuous_scale="Oranges")
                 st.plotly_chart(fig3a, use_container_width=True, theme="streamlit")
+                
             with col4_2:
-                df_lag_bar = df.dropna(subset=['prev_month_news_level']).groupby('prev_month_news_level')['Inflation'].mean().reset_index()
-                fig3b = px.bar(df_lag_bar, x='prev_month_news_level', y='Inflation', color='prev_month_news_level',
-                               title="3b: Avg Search Interest based on Prior Month's News", labels={'Inflation': 'Avg Search Interest Month t'})
+                df_violin = df.dropna(subset=['prev_month_news_level'])
+                fig3b = px.violin(df_violin, x='prev_month_news_level', y='Inflation', color='prev_month_news_level',
+                                  box=True, points="all",
+                                  title="3b: Search Interest Distribution (Violin Plot)",
+                                  labels={'Inflation': 'Search Interest (Month t)', 'prev_month_news_level': 'Prior Month Media Level'})
                 st.plotly_chart(fig3b, use_container_width=True, theme="streamlit")
-            st.success("**Answer:** High media coverage in month *t* still correlates positively with high search interest in month *t+1*. Graph 3b makes this incredibly clear: if the prior month had heavy news coverage, the current month's search interest is significantly higher on average. This proves a 'spillover effect', where public anxiety persists into the following month even after the initial news cycle.")
+                
+            st.success("**Answer:** Heavy news coverage creates a strong 'spillover effect'. Graph 3a visualizes where data clusters the most: showing that high news in month t-1 strongly correlates with high search interest in month t. Graph 3b displays the full probability density of public panic, proving that a 'High News' prior month dramatically shifts the entire distribution of public anxiety upward.")
 
         with st.container(border=True):
             st.subheader("Q4: How long does elevated Google search interest persist following major peaks in media coverage?")
@@ -358,7 +365,8 @@ elif page == "📊 Interactive Dashboard":
                                    title="4b: Search Interest Distribution (Peak vs Decay)")
                     fig4b.update_traces(boxmean=True)
                     st.plotly_chart(fig4b, use_container_width=True, theme="streamlit")
-            st.success("**Answer:** The primary news peak occurred between September and November 2022. As shown in Graph 4a, search interest began to decay quickly after the media peak subsided. Elevated search interest persisted for roughly 3 to 4 months (the decay phase until Spring 2023). Graph 4b clearly displays the underlying data points alongside the median and mean, demonstrating that during this decay period, search interest dropped significantly compared to the peak, showing a fast 'habituation effect' among the public.")
+                    
+            st.success("**Answer:** The primary news peak occurred between September and November 2022. As shown in Graph 4a, search interest began to decay quickly after the media peak subsided. Elevated search interest persisted for roughly 3 to 4 months. Graph 4b clearly displays the underlying data points alongside the median and mean, demonstrating that during this decay period, public anxiety drops substantially, showcasing a rapid 'habituation effect'.")
 
     # --- TAB 2: INFLATION VS TRENDS ---
     with tab2:
@@ -379,7 +387,7 @@ elif page == "📊 Interactive Dashboard":
                     y="Inflation",
                     color="Year",
                     size="news_count",
-                    title="5b: Official Rate vs Search Interest (bubble size = news volume)",
+                    title="5b: Official Rate vs Search Interest (Bubble = News Volume)",
                     labels={
                         "inflation_rate": "Inflation Rate (%)",
                         "Inflation": "Google Trends: Inflation (index)",
@@ -394,8 +402,8 @@ elif page == "📊 Interactive Dashboard":
                     "Inflation"
                 )
                 fig5b.update_layout(height=430)
-                st.plotly_chart(fig5b, use_container_width=True, theme="streamlit")           
-            st.success("**Answer:** They track each other exceptionally well during the escalation phase (2022). Both metrics peaked around October 2022. However, Graph 5a shows that during the disinflation phase in 2023, public search interest dropped much faster than the actual inflation rate. Graph 5b highlights that the highest correlation occurs exactly when news volume (bubble size) is massive.")
+                st.plotly_chart(fig5b, use_container_width=True, theme="streamlit")          
+            st.success("**Answer:** They track each other exceptionally well over the full timeline. Both metrics peaked synchronously around October 2022. However, Graph 5a shows that during the disinflation phase in 2023, public search interest dropped slightly faster than the actual inflation rate. Graph 5b uses a Bubble Chart to highlight a critical finding: the moments of highest correlation (top right) occur precisely when the media news volume (bubble size) is at its largest.")
 
         with st.container(border=True):
             st.subheader("Q6: How does public search interest differ during months with high inflation rates (above 5%)?")
@@ -411,7 +419,7 @@ elif page == "📊 Interactive Dashboard":
                 fig6b = px.histogram(df, x="Inflation", color="Inflation_Level", marginal="box",
                                      title="6b: Distribution of Search Volumes", barmode="overlay", opacity=0.7)
                 st.plotly_chart(fig6b, use_container_width=True, theme="streamlit")
-            st.success("**Answer:** Graph 6a proves a clear threshold effect: during months with an inflation rate above 5%, the public search interest for both 'Inflation' and 'Energiekosten' is dramatically higher. Graph 6b confirms this statistically: the entire distribution of search volume shifts drastically to the right (higher volume) during high-inflation months, showing that macroeconomic topics completely dominate public consciousness once the 5% mark is crossed.")
+            st.success("**Answer:** Graph 6a proves a massive threshold effect: During months with an inflation rate above 5%, the average search interest for 'Inflation' jumps significantly, and searches for 'Energiekosten' nearly triple. Graph 6b confirms this: the entire distribution of search volume shifts drastically to the higher end during high-inflation months, showing that macroeconomic topics completely dominate public consciousness once the 5% mark is crossed.")
 
     # --- TAB 3: ENERGY & FOOD PRICES ---
     with tab3:
@@ -425,56 +433,104 @@ elif page == "📊 Interactive Dashboard":
                 fig7a.add_trace(go.Scatter(x=df['Date'], y=df['Energiekosten'], name="Search: Energy Costs", yaxis='y2', line=dict(color='#ff7f0e', dash='dot')))
                 fig7a.update_layout(title="7a: Energy Index vs Search Trends", yaxis_title="Price Index", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
                 st.plotly_chart(fig7a, use_container_width=True, theme="streamlit")
+            
             with col6_2:
                 fig7b = px.scatter(df, x="energy_price_index", y="Energiekosten", color="inflation_rate",
-                                   title="7b: Energy Prices vs Energy Searches (Colored by Inflation)",
+                                   marginal_x="histogram", marginal_y="histogram",
+                                   title="7b: Marginal Distribution (Energy vs Searches)",
                                    labels={"energy_price_index": "Energy Price Index", "Energiekosten": "Trends: Energy Costs"})
                 st.plotly_chart(fig7b, use_container_width=True, theme="streamlit")
-            st.success("**Answer:** Energy prices served as the primary psychological trigger. Graph 7a shows that as the energy index surged in late 2022, searches for both terms skyrocketed synchronously. Graph 7b shows that the highest panic (top right corner) occurred exactly when energy prices and general inflation were both peaking. When energy prices began to plateau in 2023, the panic-driven queries dropped sharply.")
+                
+            st.success("**Answer:** Visually, the sudden surge in the energy price index in late 2022 coincided with a massive spike in search trends. However, as we will statistically prove in Q9, the overall mathematical correlation over the full 3-year timeline is actually weak. Why? Because after the initial shock in 2022, search panic dropped off rapidly, while energy prices stayed independently elevated. The public panic was driven by the *initial momentum and media shock*, not the ongoing long-term price level.")
 
         with st.container(border=True):
             st.subheader("Q8: How strongly do fluctuations in food prices explain variations in search interest for 'cost of living'?")
             col8_1, col8_2 = st.columns(2)
             with col8_1:
-                fig8a = px.scatter(df, x="food_price_index", y="Lebenshaltungskosten", color="Year",
-                                  title="8a: Food Prices vs 'Cost of Living' Searches",
+                fig8a = px.density_contour(df, x="food_price_index", y="Lebenshaltungskosten",
+                                  title="8a: Density Contour (Food Prices vs 'Cost of Living')",
                                   labels={"food_price_index": "Food Price Index", "Lebenshaltungskosten": "Trends: Cost of Living"})
+                fig8a.update_traces(contours_coloring="fill", contours_showlabels=True)
+                fig8a.add_trace(go.Scatter(x=df["food_price_index"], y=df["Lebenshaltungskosten"], mode="markers", marker=dict(color="white", size=5, line=dict(color="black", width=1)), showlegend=False))
                 st.plotly_chart(fig8a, use_container_width=True, theme="streamlit")
+                
             with col8_2:
                 fig8b = go.Figure()
                 fig8b.add_trace(go.Scatter(x=df['Date'], y=df['food_price_index'], name="Food Price Index", fill='tozeroy', marker_color='rgba(44, 160, 44, 0.2)', line=dict(color='#2ca02c')))
                 fig8b.add_trace(go.Scatter(x=df['Date'], y=df['Lebenshaltungskosten'], name="Trends: Cost of Living", yaxis='y2', line=dict(color='#1f77b4', width=3)))
                 fig8b.update_layout(title="8b: The Divergence over Time", yaxis_title="Food Index", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
                 st.plotly_chart(fig8b, use_container_width=True, theme="streamlit")
-            st.success("**Answer:** The relationship is surprisingly weak and counterintuitive in the long run. Graph 8b reveals a clear divergence: Food prices (green area) rose continuously throughout 2022 and 2023. However, search interest for 'cost of living' peaked early and then dropped. Therefore, absolute food prices do not strongly explain search variations. The initial *shock* caused searches to peak, but habituation set in even as groceries kept getting more expensive.")
+                
+            st.success("**Answer:** The relationship is counterintuitive. Graph 8a uses a Density Contour Plot to show that the heaviest concentration of 'Cost of living' searches actually happened when food prices were lower. Graph 8b reveals a massive divergence: Food prices (green area) rose continuously throughout 2022 and 2023. However, search interest dropped as prices climbed higher. This proves a powerful psychological habituation effect: the public adapted to grocery inflation, reducing their panic even as groceries became more expensive.")
 
     # --- TAB 4: MACRO INTERACTIONS ---
     with tab4:
         with st.container(border=True):
-            st.subheader("Q9: How do economic indicators (energy, food, unemployment) interact with media coverage in shaping public attention?")
-            col9_1, col9_2 = st.columns(2)
+            st.subheader("Q9: How do economic indicators interact with media coverage in shaping public attention?")
+            
+            # Die Namen für die saubere Darstellung vorbereiten
             metrics = ['news_count', 'energy_price_index', 'food_price_index', 'unemployment_rate', 'Inflation']
-            corr = df[metrics].corr(numeric_only=True)
+            clean_df = df[metrics].dropna()
+            clean_df_renamed = clean_df.rename(columns={m: clean_label(m) for m in metrics})
+            corr = clean_df_renamed.corr(numeric_only=True)
+            
+            indicators = [m for m in metrics if m != 'news_count']
+            r_vals, p_vals = [], []
+            
+            # P-Werte berechnen
+            for col in indicators:
+                r, p = pearsonr(clean_df['news_count'], clean_df[col])
+                r_vals.append(r)
+                p_vals.append(p)
+            
+            stats_df = pd.DataFrame({
+                'Indicator': [clean_label(i) for i in indicators], 
+                'Correlation with Media (r)': r_vals,
+                'p_value': p_vals
+            })
+            stats_df['Significant? (95% Confidence)'] = stats_df['p_value'].apply(lambda x: '✅ Yes (p < 0.05)' if x < 0.05 else '❌ No')
+            
+            # --- OBERE REIHE: DIE BEIDEN GRAPHEN ---
+            col9_1, col9_2 = st.columns(2)
             
             with col9_1:
+                # Graph 9a: Heatmap
                 fig9a = px.imshow(corr.round(2), text_auto=True, aspect="auto", color_continuous_scale='RdBu_r', 
-                                 title="9a: Full Correlation Heatmap")
+                                 title="9a: Full Correlation Heatmap (Pearson r)")
                 st.plotly_chart(fig9a, use_container_width=True, theme="streamlit")
+            
             with col9_2:
-                news_corr = corr[['news_count']].drop('news_count').reset_index()
-                news_corr.columns = ['Indicator', 'Correlation with Media Coverage']
-                fig9b = px.bar(news_corr, x='Indicator', y='Correlation with Media Coverage', color='Correlation with Media Coverage',
-                               color_continuous_scale='RdBu_r', title="9b: What drives the Media Cycle?")
+                # Graph 9b: WIEDER VERTIKAL WIE FRÜHER
+                fig9b = px.bar(
+                    stats_df, 
+                    x='Indicator', 
+                    y='Correlation with Media (r)', 
+                    color='Correlation with Media (r)',
+                    color_continuous_scale='RdBu_r', 
+                    title="9b: What drives the Media Cycle?",
+                    hover_data={'p_value': ':.4f', 'Significant? (95% Confidence)': True}
+                )
+                fig9b.update_layout(xaxis_title=None) # Macht es noch sauberer
                 st.plotly_chart(fig9b, use_container_width=True, theme="streamlit")
+            
+            # --- UNTERE REIHE: DIE TABELLE FÜR DIE VOLLE BREITE ---
+            st.markdown("---")
+            st.markdown("#### Exact Statistical Confidence (p-values)")
+            
+            st.dataframe(stats_df[['Indicator', 'Correlation with Media (r)', 'p_value', 'Significant? (95% Confidence)']].style.format({
+                'Correlation with Media (r)': '{:.2f}',
+                'p_value': '{:.4f}'
+            }), use_container_width=True, hide_index=True)
                 
             st.success("""
-            **Answer:** The visual synthesis provides a clear answer:
-            1. **Energy & Media:** Graph 9b shows that Energy Prices have the strongest interaction with Media Coverage. The energy shock was the narrative that triggered the news cycle.
-            2. **Food:** Food prices have a negative correlation with media peaks. Because food inflation was slow and persistent, it lacked the "sudden shock" value that drives news algorithms.
-            3. **Unemployment:** The labor market showed near-zero interaction. It remained completely stable (around 3%) and never became a topic of panic.
-            **Conclusion:** Public attention was heavily shaped by a synergy of sudden **energy price spikes** and intense **media coverage**, while steady food inflation and stable unemployment faded into the background.
+            **Answer & Statistical Confidence:** We used the **Pearson correlation algorithm** to measure the linear relationship over the entire timeline. The explicitly calculated p-values reveal a fascinating truth:
+            
+            1. **Media & Public Panic (Google Trends):** This is the strongest, highly significant relationship. The news cycle directly dictates public search behavior.
+            2. **Energy Prices:** Surprisingly, there is **no overall linear correlation** (Not Significant). Why? Because the energy crisis was a sudden, temporary shock in late 2022. Over the entire 3-year timeline, energy prices do not move linearly with the news cycle.
+            3. **Food & Unemployment:** Both show a statistically significant **negative** correlation. This represents a clear divergence: while media interest and news volume decayed rapidly after the peak of late 2022, food prices continued to rise relentlessly. The media simply lost interest in the ongoing, slow-moving pain of grocery inflation.
+            
+            **Conclusion:** The media cycle is not driven by continuous economic reality (like steady food inflation). It is strictly event-driven. It perfectly mirrors public panic, but mathematically decouples from actual, long-term macroeconomic indicators once the initial "shock" wears off.
             """)
-
 
 # ==========================================
 # PAGE 3: PROJECT SUMMARY
@@ -483,19 +539,19 @@ elif page == "🎯 Project Summary":
     st.header("🎯 Final Project Conclusion & Summary")
     with st.container(border=True):
         st.markdown("""
-        Based on our comprehensive analysis of the 9 research questions, we can draw the following core conclusions regarding the German inflation crisis (2022-2024):
+        Based on our comprehensive analysis of the 9 research questions and the exact statistical calculations shown in our Dashboard, we can draw the following core conclusions regarding the German inflation crisis (2022-2024):
         
-        ### 1. Media is the Amplifier of Economic Anxiety (Q1 - Q4)
-        Public concern (measured by Google Trends) does not simply arise on its own; it is heavily directed by the media. We found a near-perfect correlation between the volume of news articles and public search interest. When the media heavily reports on inflation, the public immediately researches related topics like "energy costs" and "cost of living". While this anxiety spills over into the following month, the public also exhibits a fast **"habituation effect"**: once the media peak ends, search interest decays within 3 to 4 months, even if the underlying economic problem persists.
+        ### 1. Media is the Ultimate Amplifier (Q1 - Q4)
+        Public concern does not simply arise on its own; it is heavily directed by the media. We found a highly significant positive correlation between the volume of news articles and public search interest. When the media heavily reports on inflation, the public immediately researches related topics. Furthermore, heavy news coverage creates a strong "spillover effect" into the following month.
         
         ### 2. The Psychological 5% Threshold (Q5 - Q6)
-        Public attention closely tracks the official inflation rate, but it is not a linear relationship. Our data proves a clear **threshold effect**: months where inflation exceeded 5% saw dramatically higher, panic-level search volumes. Below this psychological threshold, macroeconomic topics largely fade from the public's daily consciousness.
+        Public attention closely tracks the official inflation rate. Our data proves a clear **threshold effect**: months where inflation exceeded 5% saw dramatically higher, panic-level search volumes (e.g., searches for energy costs nearly tripled). Below this psychological threshold, macroeconomic topics largely fade from the public's daily consciousness.
         
-        ### 3. Energy Shocks vs. Food Habituation (Q7 - Q8)
-        Not all price increases trigger the same psychological response. **Energy prices** acted as the primary shock catalyst in 2022. The sudden explosion of energy costs caused immediate, synchronous spikes in public panic. In contrast, **food prices** rose continuously and relentlessly throughout 2022 and 2023, yet public searches for "cost of living" dropped off early. This proves that people adapt to slow, continuous price pain (groceries), but panic over sudden, unpredictable price shocks (energy).
+        ### 3. The Habituation Effect: Prices decoupling from Panic (Q7 - Q8)
+        Our most surprising finding is that actual living costs eventually decouple from public panic. While the initial explosion of energy prices in 2022 caused an immediate shock, the long-term correlation to the media cycle is statistically insignificant. Even more striking: Food prices rose continuously throughout 2022 and 2023, yet public searches for "cost of living" dropped off, resulting in a significant negative correlation. This proves a **psychological habituation effect**: people adapt to slow, continuous price pain (groceries), but only panic during sudden, unpredictable media shocks.
         
         ### 4. The Ultimate Synthesis (Q9)
-        The 2022-2024 crisis in Germany was primarily characterized by a synergy of sudden **energy price spikes** and intense **media coverage**. Interestingly, the labor market remained completely insulated—unemployment stayed perfectly flat at around 3% and never contributed to the public panic. Ultimately, the perceived crisis was a "price and media" crisis, not an employment crisis.
+        The 2022-2024 crisis in Germany was primarily an "event-driven media crisis" rather than a continuous reflection of structural data. The labor market remained completely insulated—unemployment stayed flat and showed a significant negative correlation with media panic, proving it never contributed to the public's anxiety.
         """)
         
         st.info("💡 **Takeaway:** Economic crises are as much psychological as they are mathematical. Managing public panic requires managing both energy volatility and media narratives.")
