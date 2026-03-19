@@ -432,7 +432,7 @@ elif page == "📊 Interactive Dashboard":
         dff3 = df_main[df_main['Year'] == y3] if y3 != "All Years" else df_main.copy()
         
         with st.container(border=True):
-            st.subheader("Q7: How do changes in energy prices influence search interest?")
+            st.subheader("Q7: How do changes in energy prices influence search interest for 'inflation' and 'energy costs'?")
 
             col6_1, col6_2 = st.columns(2)
 
@@ -514,6 +514,9 @@ elif page == "📊 Interactive Dashboard":
                 fig7b.update_layout(height=450)
 
                 st.plotly_chart(fig7b, use_container_width=True, theme="streamlit")
+            st.success(
+                "**Answer:** The plots show that sharp increases in energy prices—especially in late 2022—coincide with strong spikes in search interest for both “inflation” and “energy costs.” However, this relationship is short-lived. After the initial surge, search interest declines significantly even though energy prices remain relatively high. The scatter plots further confirm that there is no strong long-term correlation, indicating that public attention is driven more by sudden price shocks than by sustained energy price levels."
+            )
         with st.container(border=True):
             st.subheader("Q8: How strongly do fluctuations in food prices explain variations in search interest?")
 
@@ -599,6 +602,9 @@ elif page == "📊 Interactive Dashboard":
                 )
 
                 st.plotly_chart(fig8b, use_container_width=True, theme="streamlit")
+            st.success(
+                "**Answer:** The plots indicate a weak and inconsistent relationship between food prices and search interest for “cost of living.” While food prices show a steady upward trend, search interest fluctuates without a clear pattern. The density plot shows no strong clustering along a trend line, and the time series highlights a divergence between rising prices and unstable search behavior. Overall, food price changes alone do not strongly explain variations in search interest."
+            )
     # --- TAB 4: MACRO INTERACTIONS ---
     with tab4:
         y4 = st.selectbox("📅 Filter Timeline for Tab 4:", available_years, key="y4")
