@@ -316,7 +316,7 @@ elif page == "📊 Interactive Dashboard":
                 else:
                     st.info("Not enough data to construct a Violin Plot for this specific year.")
                 
-            st.success("**Answer:** Heavy news coverage creates a strong 'spillover effect'. Graph 3a visualizes where data clusters the most: showing that high news in month t-1 strongly correlates with high search interest in month t. Graph 3b displays the full probability density of public panic, proving that a 'High News' prior month dramatically shifts the entire distribution of public anxiety upward.")
+            st.success("**Answer:** Media coverage shows a moderate spillover effect on search interest. Graph 3a suggests a weak positive relationship between prior news volume and subsequent search, though the pattern is dispersed. Graph 3b shows that higher prior media coverage shifts search interest upward, but with considerable variability.")
 
         with st.container(border=True):
             st.subheader("Q4: How long does elevated Google search interest persist following major peaks in media coverage?")
@@ -325,7 +325,7 @@ elif page == "📊 Interactive Dashboard":
                 fig4a = go.Figure()
                 fig4a.add_trace(go.Scatter(
                     x=dff1['Date'], y=dff1['news_count'],
-                    name="News Count",
+                    name="News Count: Inflation",
                     fill='tozeroy',
                     fillcolor=COLORS["news_fill"],
                     line=dict(color=COLORS["news_line"], width=2)
@@ -339,7 +339,7 @@ elif page == "📊 Interactive Dashboard":
                 fig4a.update_layout(
                     title="4a: Decay of Public Interest Timeline",
                     yaxis_title="News Count (articles/month)",
-                    yaxis2=dict(title="Google Trends Index", overlaying='y', side='right'),
+                    yaxis2=dict(title="Google Trends Index", overlaying='y', side='right',range=[0, 100]),
                     height=430,
                     xaxis=dict(
                         title="Date",
@@ -470,10 +470,10 @@ elif page == "📊 Interactive Dashboard":
                 fig8b = go.Figure()
                 fig8b.add_trace(go.Scatter(x=dff3['Date'], y=dff3['food_price_index'], name="Food Price Index", fill='tozeroy', marker_color='rgba(44, 160, 44, 0.2)', line=dict(color='#2ca02c')))
                 fig8b.add_trace(go.Scatter(x=dff3['Date'], y=dff3['Lebenshaltungskosten'], name="Trends: Cost of Living", yaxis='y2', line=dict(color='#1f77b4', width=3)))
-                fig8b.update_layout(title="8b: The Divergence over Time", yaxis_title="Food Index", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
+                fig8b.update_layout(title="8b: The Divergence over Time", yaxis_title="Food Price Index", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
                 st.plotly_chart(fig8b, use_container_width=True, theme="streamlit")
                 
-            st.success("**Answer:** The relationship is counterintuitive. Graph 8a uses a Density Contour Plot to show that the heaviest concentration of 'Cost of living' searches actually happened when food prices were lower. Graph 8b reveals a massive divergence: Food prices (green area) rose continuously throughout 2022 and 2023. However, search interest dropped as prices climbed higher. This proves a powerful psychological habituation effect: the public adapted to grocery inflation, reducing their panic even as groceries became more expensive.")
+            st.success("**Answer:** The relationship appears weak and somewhat counterintuitive. Graph 8a shows no clear positive association between food prices and search interest. Graph 8b highlights a divergence, where food prices rise steadily while search interest fluctuates and does not consistently increase, suggesting that food prices alone do not strongly drive search behavior.")
 
     # --- TAB 4: MACRO INTERACTIONS ---
     with tab4:
@@ -555,20 +555,20 @@ elif page == "🎯 Project Summary":
         st.markdown("""
         Based on our comprehensive analysis of the 9 research questions and the exact statistical calculations shown in our Dashboard, we can draw the following core conclusions regarding the German inflation crisis (2022-2024):
         
-        ### 1. Media is the Ultimate Amplifier (Q1 - Q4)
-        Public concern does not simply arise on its own; it is heavily directed by the media. We found a highly significant positive correlation between the volume of news articles and public search interest. When the media heavily reports on inflation, the public immediately researches related topics. Furthermore, heavy news coverage creates a strong "spillover effect" into the following month.
+        ### 1. Media as a key Amplifier (Q1 - Q4)
+        Public concern does not simply arise on its own; it is heavily directed by the media. We found a highly significant positive correlation between the volume of news articles and public search interest. When the media heavily reports on inflation, the public immediately researches related topics. Some evidence also points to a short-term spillover effect into subsequent periods.
         
-        ### 2. The Psychological 5% Threshold (Q5 - Q6)
+        ### 2. Evidence of a Threshold Effect (Q5 - Q6)
         Public attention closely tracks the official inflation rate. Our data proves a clear **threshold effect**: months where inflation exceeded 5% saw dramatically higher, panic-level search volumes (e.g., searches for energy costs nearly tripled). Below this psychological threshold, macroeconomic topics largely fade from the public's daily consciousness.
         
         ### 3. The Habituation Effect: Prices decoupling from Panic (Q7 - Q8)
         Our most surprising finding is that actual living costs eventually decouple from public panic. While the initial explosion of energy prices in 2022 caused an immediate shock, the long-term correlation to the media cycle is statistically insignificant. Even more striking: Food prices rose continuously throughout 2022 and 2023, yet public searches for "cost of living" dropped off, resulting in a significant negative correlation. This proves a **psychological habituation effect**: people adapt to slow, continuous price pain (groceries), but only panic during sudden, unpredictable media shocks.
         
-        ### 4. The Ultimate Synthesis (Q9)
-        The 2022-2024 crisis in Germany was primarily an "event-driven media crisis" rather than a continuous reflection of structural data. The labor market remained completely insulated—unemployment stayed flat and showed a significant negative correlation with media panic, proving it never contributed to the public's anxiety.
+        ### 4. The Synthesis (Q9)
+        Overall, the findings suggest that public attention is more closely aligned with media dynamics and salient economic shocks than with steady underlying trends. Some indicators, such as unemployment, show limited alignment with media coverage and search behavior.
         """)
         
-        st.info("💡 **Takeaway:** Economic crises are as much psychological as they are mathematical. Managing public panic requires managing both energy volatility and media narratives.")
+        st.info("💡 **Takeaway:** Economic crises appear to be shaped not only by underlying economic conditions but also by media dynamics and public perception.")
 
 # --- FOOTER ---
 st.markdown("---")
