@@ -432,49 +432,173 @@ elif page == "📊 Interactive Dashboard":
         dff3 = df_main[df_main['Year'] == y3] if y3 != "All Years" else df_main.copy()
         
         with st.container(border=True):
-            st.subheader("Q7: How do changes in energy prices influence search interest for 'inflation' and 'energy costs'?")
+            st.subheader("Q7: How do changes in energy prices influence search interest?")
+
             col6_1, col6_2 = st.columns(2)
+
+            # Mapping for English UI
+            search_map = {
+                "Inflation": "Inflation",
+                "Energy Costs": "Energiekosten"
+            }
+
             with col6_1:
+                # Reserve the same vertical space as the dropdown on the right
+                st.markdown("<div style='height: 76px;'></div>", unsafe_allow_html=True)
+
                 fig7a = go.Figure()
-                fig7a.add_trace(go.Scatter(x=dff3['Date'], y=dff3['energy_price_index'], name="Energy Price Index", line=dict(color='#d62728', width=3)))
-                fig7a.add_trace(go.Scatter(x=dff3['Date'], y=dff3['Inflation'], name="Search: Inflation", yaxis='y2', line=dict(color='#1f77b4', dash='dot')))
-                fig7a.add_trace(go.Scatter(x=dff3['Date'], y=dff3['Energiekosten'], name="Search: Energy Costs", yaxis='y2', line=dict(color='#ff7f0e', dash='dot')))
-                fig7a.update_layout(title="7a: Energy Index vs Search Trends", yaxis_title="Price Index", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
+                fig7a.add_trace(go.Scatter(
+                    x=dff3['Date'],
+                    y=dff3['energy_price_index'],
+                    name="Energy Price Index",
+                    line=dict(color='#d62728', width=3)
+                ))
+                fig7a.add_trace(go.Scatter(
+                    x=dff3['Date'],
+                    y=dff3['Inflation'],
+                    name="Search: Inflation",
+                    yaxis='y2',
+                    line=dict(color='#1f77b4', dash='dot')
+                ))
+                fig7a.add_trace(go.Scatter(
+                    x=dff3['Date'],
+                    y=dff3['Energiekosten'],
+                    name="Search: Energy Costs",
+                    yaxis='y2',
+                    line=dict(color='#ff7f0e', dash='dot')
+                ))
+
+                fig7a.update_layout(
+                    title="7a: Energy Index vs Search Trends",
+                    yaxis_title="Price Index",
+                    yaxis2=dict(
+                        title="Google Trends",
+                        overlaying='y',
+                        side='right'
+                    ),
+                    height=450
+                )
+
                 st.plotly_chart(fig7a, use_container_width=True, theme="streamlit")
-            
+
             with col6_2:
-                # NEU: Farb-Parameter "color='inflation_rate'" wurde durch "color_discrete_sequence=['#d62728']" ersetzt
-                fig7b = px.scatter(dff3, x="energy_price_index", y="Energiekosten", 
-                                   color_discrete_sequence=['#d62728'],
-                                   marginal_x="histogram", marginal_y="histogram",
-                                   title="7b: Marginal Distribution (Energy vs Searches)",
-                                   labels={"energy_price_index": "Energy Price Index", "Energiekosten": "Trends: Energy Costs"})
-                # Leichtes Outline hinzufügen für bessere Lesbarkeit
-                fig7b.update_traces(marker=dict(line=dict(width=1, color='DarkSlateGrey')), opacity=0.8)
+                selected_label = st.selectbox(
+                    "Choose search term:",
+                    list(search_map.keys()),
+                    key="q7b_search"
+                )
+
+                selected_column = search_map[selected_label]
+
+                fig7b = px.scatter(
+                    dff3,
+                    x="energy_price_index",
+                    y=selected_column,
+                    color_discrete_sequence=['#d62728'],
+                    marginal_x="histogram",
+                    marginal_y="histogram",
+                    title=f"7b: Energy vs {selected_label}",
+                    labels={
+                        "energy_price_index": "Energy Price Index",
+                        selected_column: f"Trends: {selected_label}"
+                    }
+                )
+
+                fig7b.update_traces(
+                    marker=dict(
+                        line=dict(width=1, color='DarkSlateGrey')
+                    ),
+                    opacity=0.8
+                )
+
+                fig7b.update_layout(height=450)
+
                 st.plotly_chart(fig7b, use_container_width=True, theme="streamlit")
-                
-            st.success("**Answer:** Visually, the sudden surge in the energy price index in late 2022 coincided with a massive spike in search trends. However, as we will statistically prove in Q9, the overall mathematical correlation over the full 3-year timeline is actually weak. Why? Because after the initial shock in 2022, search panic dropped off rapidly, while energy prices stayed independently elevated. The public panic was driven by the *initial momentum and media shock*, not the ongoing long-term price level.")
-
         with st.container(border=True):
-            st.subheader("Q8: How strongly do fluctuations in food prices explain variations in search interest for 'cost of living'?")
-            col8_1, col8_2 = st.columns(2)
-            with col8_1:
-                fig8a = px.density_contour(dff3, x="food_price_index", y="Lebenshaltungskosten",
-                                  title="8a: Density Contour (Food Prices vs 'Cost of Living')",
-                                  labels={"food_price_index": "Food Price Index", "Lebenshaltungskosten": "Trends: Cost of Living"})
-                fig8a.update_traces(contours_coloring="fill", contours_showlabels=True)
-                fig8a.add_trace(go.Scatter(x=dff3["food_price_index"], y=dff3["Lebenshaltungskosten"], mode="markers", marker=dict(color="white", size=5, line=dict(color="black", width=1)), showlegend=False))
-                st.plotly_chart(fig8a, use_container_width=True, theme="streamlit")
-                
-            with col8_2:
-                fig8b = go.Figure()
-                fig8b.add_trace(go.Scatter(x=dff3['Date'], y=dff3['food_price_index'], name="Food Price Index", fill='tozeroy', marker_color='rgba(44, 160, 44, 0.2)', line=dict(color='#2ca02c')))
-                fig8b.add_trace(go.Scatter(x=dff3['Date'], y=dff3['Lebenshaltungskosten'], name="Trends: Cost of Living", yaxis='y2', line=dict(color='#1f77b4', width=3)))
-                fig8b.update_layout(title="8b: The Divergence over Time", yaxis_title="Food Price Index", yaxis2=dict(title="Google Trends", overlaying='y', side='right'))
-                st.plotly_chart(fig8b, use_container_width=True, theme="streamlit")
-                
-            st.success("**Answer:** The relationship appears weak and somewhat counterintuitive. Graph 8a shows no clear positive association between food prices and search interest. Graph 8b highlights a divergence, where food prices rise steadily while search interest fluctuates and does not consistently increase, suggesting that food prices alone do not strongly drive search behavior.")
+            st.subheader("Q8: How strongly do fluctuations in food prices explain variations in search interest?")
 
+            col8_1, col8_2 = st.columns(2)
+
+            with col8_1:
+                search_map_q8 = {
+                    "Cost of Living": "Lebenshaltungskosten",
+                    "Inflation": "Inflation"
+                }
+
+                selected_label_q8 = st.selectbox(
+                    "Choose search term:",
+                    list(search_map_q8.keys()),
+                    key="q8a_search"
+                )
+
+                selected_column_q8 = search_map_q8[selected_label_q8]
+
+                fig8a = px.density_contour(
+                    dff3,
+                    x="food_price_index",
+                    y=selected_column_q8,
+                    title=f"8a: Food Prices vs {selected_label_q8}",
+                    labels={
+                        "food_price_index": "Food Price Index",
+                        selected_column_q8: f"Trends: {selected_label_q8}"
+                    }
+                )
+
+                fig8a.update_traces(
+                    contours_coloring="fill",
+                    contours_showlabels=True
+                )
+
+                fig8a.add_trace(
+                    go.Scatter(
+                        x=dff3["food_price_index"],
+                        y=dff3[selected_column_q8],
+                        mode="markers",
+                        marker=dict(
+                            color="white",
+                            size=5,
+                            line=dict(color="black", width=1)
+                        ),
+                        showlegend=False
+                    )
+                )
+
+                fig8a.update_layout(height=450)
+
+                st.plotly_chart(fig8a, use_container_width=True, theme="streamlit")
+
+            with col8_2:
+                st.markdown("<div style='height: 76px;'></div>", unsafe_allow_html=True)
+
+                fig8b = go.Figure()
+                fig8b.add_trace(go.Scatter(
+                    x=dff3['Date'],
+                    y=dff3['food_price_index'],
+                    name="Food Price Index",
+                    fill='tozeroy',
+                    marker_color='rgba(44, 160, 44, 0.2)',
+                    line=dict(color='#2ca02c')
+                ))
+                fig8b.add_trace(go.Scatter(
+                    x=dff3['Date'],
+                    y=dff3['Lebenshaltungskosten'],
+                    name="Trends: Cost of Living",
+                    yaxis='y2',
+                    line=dict(color='#1f77b4', width=3)
+                ))
+
+                fig8b.update_layout(
+                    title="8b: The Divergence over Time",
+                    yaxis_title="Food Price Index",
+                    yaxis2=dict(
+                        title="Google Trends",
+                        overlaying='y',
+                        side='right'
+                    ),
+                    height=450
+                )
+
+                st.plotly_chart(fig8b, use_container_width=True, theme="streamlit")
     # --- TAB 4: MACRO INTERACTIONS ---
     with tab4:
         y4 = st.selectbox("📅 Filter Timeline for Tab 4:", available_years, key="y4")
