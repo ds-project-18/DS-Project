@@ -100,6 +100,6 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 1. **Install dependencies:** `pip install -r requirements.txt`
 2. **Launch the dashboard:** `streamlit run src/web/web.py`
 
-## 🤖 LLM Usage Disclosure
+##  LLM Usage Disclosure
 This project utilized LLMs (Gemini, ChatGPT) for code optimization, statistical logic, and documentation. All AI-generated outputs were manually verified and refined by the team to ensure academic integrity.
 
