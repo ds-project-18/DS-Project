@@ -94,7 +94,6 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 - All non-trivial functions have docstrings explaining their purpose, arguments and return values
 - Inline comments are added wherever the logic is not immediately self-evident, for example to explain the lagged spillover calculation or the pearsonr safety guard
 
----
 
 ## 8. How to Run:
 
