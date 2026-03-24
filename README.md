@@ -78,3 +78,12 @@ Data Visualization Code: Assisting in writing and troubleshooting the Python cod
 Code Structuring: Helping to format and structure our codebase cleanly and professionally.
 
 English Language Assistance: Refining and translating our texts to ensure a natural and professional flow for the final presentation.
+
+7. Code Quality
+- Functions and variables are named using snake_case (e.g. load_data(), find_and_convert_date())
+- Module-level constants use UPPER_SNAKE_CASE (e.g. COLORS, LABELS)
+- Lines are kept under 88 characters
+- Imports are grouped into standard library, third-party, and local modules
+- All non-trivial functions have docstrings explaining their purpose, arguments and return values
+- Inline comments are added wherever the logic is not immediately self-evident, for example to explain the lagged spillover calculation or the pearsonr safety guard
+
