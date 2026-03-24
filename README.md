@@ -96,7 +96,7 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 
 ---
 
-##  How to Run:
+## 8. How to Run:
 
 ```bash
 python -m venv venv
