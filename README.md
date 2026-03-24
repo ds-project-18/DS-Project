@@ -1,6 +1,11 @@
-![Python](https://img.shields.io/badge/python-3.10+-blue.svg) ![Streamlit](https://img.shields.io/badge/streamlit-1.31-red.svg) ![Status](https://img.shields.io/badge/status-final--project-green.svg)
+#![Python](https://img.shields.io/badge/python-3.10+-blue.svg) ![Streamlit](https://img.shields.io/badge/streamlit-1.31-red.svg) ![Status](https://img.shields.io/badge/status-final--project-green.svg)
 
 # Media, Public Interest and Inflation in Germany (2022-2024)
+
+### 📊 Key Findings
+* **Media Influence:** Strong correlation between news volume and public search interest.
+- **Psychological Threshold:** Public panic surges once inflation crosses the 5% mark.
+- **Habituation Effect:** Search interest decays faster than actual prices, indicating "crisis fatigue."
 
 1. Topic and Research Questions:
 
