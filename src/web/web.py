@@ -78,6 +78,7 @@ def clean_label(name):
     """Returns the mapped UI label or a title-cased fallback if not found in LABELS."""
     return LABELS.get(name, name.replace("_", " ").title())
 
+# [LLM-Assisted]: Logic for linear regression and Pearson correlation.
 def add_trendline_and_corr(fig, x, y, x_name, y_name, color="#94a3b8"):
     """
     Calculates the Pearson correlation coefficient and linear regression line (y = mx + b),
