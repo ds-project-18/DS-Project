@@ -552,6 +552,8 @@ elif page == "📊 Interactive Dashboard":
             indicators = [m for m in metrics if m != 'news_count']
             r_vals, p_vals = [], []
             
+            # [QA-Note]: Iterating through indicators to calculate Pearson r 
+            # and p-values for statistical significance testing.
             # Iteratively calculate Pearson r and strictly capture the p-value for statistical significance checking
             for col in indicators:
                 valid_subset = clean_df[['news_count', col]].dropna()
