@@ -96,13 +96,13 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 
 ---
 
-##  How to Run
-soll das sein mit hoiw to run? ```bash
-python -m venv venv
-# Aktivieren (Windows): venv\Scripts\activate
-# Aktivieren (Mac/Linux): source venv/bin/activate
-pip install -r requirements.txt
-streamlit run src/web/web.py
+##  How to Run:
+```bash
+- python -m venv venv
+- Activate (Windows): venv\Scripts\activate
+- Activate (Mac/Linux): source venv/bin/activate
+- pip install -r requirements.txt
+- streamlit run src/web/web.py
 
 ##  LLM Usage Disclosure
 This project utilized LLMs (Gemini, ChatGPT) for code optimization, statistical logic, and documentation. All AI-generated outputs were manually verified and refined by the team to ensure academic integrity.
