@@ -1,6 +1,8 @@
-Media, Public Interest and Inflation in Germany (2022-2024)
+![Python](https://img.shields.io/badge/python-3.10+-blue.svg) ![Streamlit](https://img.shields.io/badge/streamlit-1.31-red.svg) ![Status](https://img.shields.io/badge/status-final--project-green.svg)
 
-1. Topic and Research Questions:
+# Media, Public Interest and Inflation in Germany (2022-2024)
+
+## 1. Topic and Research Questions:
 
 This project examines the relationship between media coverage of inflation, public attention, and economic indicators in Germany between 2022 and 2024. The objective is to analyze how news volume, Google search beavior, and official economic data interact. 
 
@@ -38,7 +40,12 @@ Q9. How do economic indicators (energy prices, food prices, and
 unemployment) interact with media coverage in shaping public
 attention to inflation in Germany?
 
-2. Data 
+###  Key Findings
+* **Media Influence:** Strong correlation between news volume and public search interest.
+* **Psychological Threshold:** Public panic surges once inflation crosses the 5% mark.
+* **Habituation Effect:** Search interest decays faster than actual prices, indicating "crisis fatigue."
+  
+## 2. Data 
 
 The project uses data from the following sources: 
 - European commission (Eurosat) - inflation rate, energy price index, food   price index, unemployment rate 
@@ -47,7 +54,7 @@ The project uses data from the following sources:
 
 All data is aggregated at a monthly level, with one observation per month from 2022 to 2024. 
 
-3. Data pipeline
+## 3. Data pipeline
 
 Acquisition: 
 - Data collected via API access 
@@ -58,18 +65,18 @@ Processing:
 Storage and loading: 
 -Processed datasets are stored as CSV files in the repository 
 
-4. Implementation/Deployment: 
+## 4. Implementation/Deployment: 
 
 The website was built using Streamlit as the main framework, with plotly for interactive visualizations and pandas for data handling. The application is implemented in a single file (src\web\web.py). Preprocessed CSV files are stored in the repository (data\processed) and loaded using a central data-loading function. These datasets are merged and prepared when the app starts. The project is deployed via Streamlit community Cloud, which is connected to the GitHub repository and automatically redeploys the app whenever changes are pushed to the main branch. 
 
-5. How to use: 
+## 5. How to use: 
 
 - open the app via the provided link (https://data-science-project-26.streamlit.app/)
 - Navigate through the side bar 
 - Naviagte through the different tabs 
 - Use filters (e.g. year selection) to explore the data 
 
-6. LLM usage: 
+## 6. LLM usage: 
 
 A Large Langugage Model (Gemini, ChatGPT) was used for support of the follwoing tasks:
 
@@ -79,7 +86,7 @@ Code Structuring: Helping to format and structure our codebase cleanly and profe
 
 English Language Assistance: Refining and translating our texts to ensure a natural and professional flow for the final presentation.
 
-7. Code Quality
+## 7. Code Quality
 - Functions and variables are named using snake_case (e.g. load_data(), find_and_convert_date())
 - Module-level constants use UPPER_SNAKE_CASE (e.g. COLORS, LABELS)
 - Lines are kept under 88 characters
@@ -87,3 +94,12 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 - All non-trivial functions have docstrings explaining their purpose, arguments and return values
 - Inline comments are added wherever the logic is not immediately self-evident, for example to explain the lagged spillover calculation or the pearsonr safety guard
 
+
+## 8. How to Run:
+
+```bash
+python -m venv venv
+# Windows: venv\Scripts\activate
+# Mac/Linux: source venv/bin/activate
+pip install -r requirements.txt
+streamlit run src/web/web.py

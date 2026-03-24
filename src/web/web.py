@@ -2,6 +2,9 @@
 Main Streamlit Application: Media, Public Interest & Inflation in Germany (2022-2024)
 This dashboard analyzes the psychological and macroeconomic effects of the inflation crisis 
 by correlating official economic data (Destatis) with media volume (GDELT) and public panic (Google Trends).
+
+[LLM-CREDIT]: This code was developed with support from Gemini and ChatGPT 
+for data visualization and structural optimization.
 """
 
 # --- IMPORTS ---
@@ -75,6 +78,7 @@ def clean_label(name):
     """Returns the mapped UI label or a title-cased fallback if not found in LABELS."""
     return LABELS.get(name, name.replace("_", " ").title())
 
+# [LLM-Assisted]: Logic for linear regression and Pearson correlation.
 def add_trendline_and_corr(fig, x, y, x_name, y_name, color="#94a3b8"):
     """
     Calculates the Pearson correlation coefficient and linear regression line (y = mx + b),
@@ -173,6 +177,8 @@ def load_data():
         df['prev_month_news_level'] = np.where(df['news_count_lag1'] > avg_news, 'High News Prior Month', 'Low News Prior Month')
         df.loc[df['news_count_lag1'].isna(), 'prev_month_news_level'] = None 
 
+        # [LLM-Assisted]: Categorizing specific time-frames into 'Crisis' and 'Decay' 
+        # phases to analyze the psychological habituation effect.
         # 3. Define specific historical crisis phases based on the 2022 timeline
         df['Phase'] = 'Baseline'
         df.loc[(df['Date'] >= '2022-09-01') & (df['Date'] <= '2022-11-01'), 'Phase'] = 'Peak Crisis'
@@ -546,6 +552,8 @@ elif page == "📊 Interactive Dashboard":
             indicators = [m for m in metrics if m != 'news_count']
             r_vals, p_vals = [], []
             
+            # [QA-Note]: Iterating through indicators to calculate Pearson r 
+            # and p-values for statistical significance testing.
             # Iteratively calculate Pearson r and strictly capture the p-value for statistical significance checking
             for col in indicators:
                 valid_subset = clean_df[['news_count', col]].dropna()
@@ -631,3 +639,8 @@ elif page == "🎯 Project Summary":
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("<p style='text-align: center; color: gray;'>Data Science Project 2026</p>", unsafe_allow_html=True)
+
+# --- ENTRY POINT ---
+if __name__ == "__main__":
+    # Standard Python entry point for better code structure (PEP 8)
+    pass
