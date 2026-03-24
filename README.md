@@ -2,7 +2,7 @@
 
 # Media, Public Interest and Inflation in Germany (2022-2024)
 
-### 📊 Key Findings
+### Key Findings
 * **Media Influence:** Strong correlation between news volume and public search interest.
 - **Psychological Threshold:** Public panic surges once inflation crosses the 5% mark.
 - **Habituation Effect:** Search interest decays faster than actual prices, indicating "crisis fatigue."
