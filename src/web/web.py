@@ -2,6 +2,9 @@
 Main Streamlit Application: Media, Public Interest & Inflation in Germany (2022-2024)
 This dashboard analyzes the psychological and macroeconomic effects of the inflation crisis 
 by correlating official economic data (Destatis) with media volume (GDELT) and public panic (Google Trends).
+
+[LLM-CREDIT]: This code was developed with support from Gemini and ChatGPT 
+for data visualization and structural optimization.
 """
 
 # --- IMPORTS ---
