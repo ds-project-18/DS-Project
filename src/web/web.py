@@ -639,3 +639,8 @@ elif page == "🎯 Project Summary":
 # --- FOOTER ---
 st.markdown("---")
 st.markdown("<p style='text-align: center; color: gray;'>Data Science Project 2026</p>", unsafe_allow_html=True)
+
+# --- ENTRY POINT ---
+if __name__ == "__main__":
+    # Standard Python entry point for better code structure (PEP 8)
+    pass
