@@ -103,3 +103,9 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 ##  LLM Usage Disclosure
 This project utilized LLMs (Gemini, ChatGPT) for code optimization, statistical logic, and documentation. All AI-generated outputs were manually verified and refined by the team to ensure academic integrity.
 
+## 🛠️ Setup & Start (Moodle Requirements)
+
+1. **Umgebung erstellen (Environment):**
+   ```bash
+   python -m venv venv
+
