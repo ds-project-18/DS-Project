@@ -177,6 +177,8 @@ def load_data():
         df['prev_month_news_level'] = np.where(df['news_count_lag1'] > avg_news, 'High News Prior Month', 'Low News Prior Month')
         df.loc[df['news_count_lag1'].isna(), 'prev_month_news_level'] = None 
 
+        # [LLM-Assisted]: Categorizing specific time-frames into 'Crisis' and 'Decay' 
+        # phases to analyze the psychological habituation effect.
         # 3. Define specific historical crisis phases based on the 2022 timeline
         df['Phase'] = 'Baseline'
         df.loc[(df['Date'] >= '2022-09-01') & (df['Date'] <= '2022-11-01'), 'Phase'] = 'Peak Crisis'
