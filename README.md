@@ -94,3 +94,12 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 - All non-trivial functions have docstrings explaining their purpose, arguments and return values
 - Inline comments are added wherever the logic is not immediately self-evident, for example to explain the lagged spillover calculation or the pearsonr safety guard
 
+---
+
+##  How to Run
+1. **Install dependencies:** `pip install -r requirements.txt`
+2. **Launch the dashboard:** `streamlit run src/web/web.py`
+
+## 🤖 LLM Usage Disclosure
+This project utilized LLMs (Gemini, ChatGPT) for code optimization, statistical logic, and documentation. All AI-generated outputs were manually verified and refined by the team to ensure academic integrity.
+
