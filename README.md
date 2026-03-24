@@ -8,35 +8,35 @@ This project examines the relationship between media coverage of inflation, publ
 
 The research questions are: 
 
-### Q1. How strong is the relationship between the daily number of German
+Q1. How strong is the relationship between the daily number of German
 news articles mentioning “Inflation” and the Google Trends search
 index for “Inflation” in Germany?
 
-### Q2. To what extent does increased media coverage of inflation influence
+Q2. To what extent does increased media coverage of inflation influence
 Google search interest for related terms such as “Energy costs” and
 “Cost of living” in Germany?
 
-### Q3. How closely does Google search interest for “Inflation” track the
+Q3. How closely does Google search interest for “Inflation” track the
 official monthly inflation rate in Germany over time?1. 
 
-### Q4. To what extent does media coverage on day t explain variation in
+Q4. To what extent does media coverage on day t explain variation in
 Google search interest on day t+1?
 
-### Q5. How long does elevated Google search interest persist following major
+Q5. How long does elevated Google search interest persist following major
 peaks in media coverage?
 
-### Q6. How do changes in energy prices influence Google search interest for
+Q6. How do changes in energy prices influence Google search interest for
 “inflation” and “energy costs” in Germany during the period
 2022–2024?
 
-### Q7. How does public search interest differ during months with high
+Q7. How does public search interest differ during months with high
 inflation rates (e.g., above 5)
 
-### Q8. How strongly do fluctuations in food prices explain variations in
+Q8. How strongly do fluctuations in food prices explain variations in
 Google search interest for “cost of living” in Germany during the
 period 2022–2024?
 
-### Q9. How do economic indicators (energy prices, food prices, and
+Q9. How do economic indicators (energy prices, food prices, and
 unemployment) interact with media coverage in shaping public
 attention to inflation in Germany?
 
