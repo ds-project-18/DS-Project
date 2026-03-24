@@ -8,7 +8,7 @@ This project examines the relationship between media coverage of inflation, publ
 
 The research questions are: 
 
-Q1. How strong is the relationship between the daily number of German
+## Q1. How strong is the relationship between the daily number of German
 news articles mentioning “Inflation” and the Google Trends search
 index for “Inflation” in Germany?
 
