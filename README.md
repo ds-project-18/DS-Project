@@ -97,15 +97,14 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 ---
 
 ##  How to Run
-1. **Install dependencies:** `pip install -r requirements.txt`
-2. **Launch the dashboard:** `streamlit run src/web/web.py`
+soll das sein mit hoiw to run? ```bash
+python -m venv venv
+# Aktivieren (Windows): venv\Scripts\activate
+# Aktivieren (Mac/Linux): source venv/bin/activate
+pip install -r requirements.txt
+streamlit run src/web/web.py
 
 ##  LLM Usage Disclosure
 This project utilized LLMs (Gemini, ChatGPT) for code optimization, statistical logic, and documentation. All AI-generated outputs were manually verified and refined by the team to ensure academic integrity.
 
-## 🛠️ Setup & Start (Moodle Requirements)
-
-1. **Umgebung erstellen (Environment):**
-   ```bash
-   python -m venv venv
 
