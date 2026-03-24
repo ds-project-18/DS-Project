@@ -2,13 +2,13 @@
 
 # Media, Public Interest and Inflation in Germany (2022-2024)
 
-1. Topic and Research Questions:
+## 1. Topic and Research Questions:
 
 This project examines the relationship between media coverage of inflation, public attention, and economic indicators in Germany between 2022 and 2024. The objective is to analyze how news volume, Google search beavior, and official economic data interact. 
 
 The research questions are: 
 
-## Q1. How strong is the relationship between the daily number of German
+Q1. How strong is the relationship between the daily number of German
 news articles mentioning “Inflation” and the Google Trends search
 index for “Inflation” in Germany?
 
