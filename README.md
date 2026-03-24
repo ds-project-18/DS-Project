@@ -97,9 +97,11 @@ English Language Assistance: Refining and translating our texts to ensure a natu
 ---
 
 ##  How to Run:
-- python -m venv venv
-- Windows: venv\Scripts\activate
-- Mac/Linux: source venv/bin/activate
-- pip install -r requirements.txt
-- streamlit run src/web/web.py
+---
 
+```bash
+python -m venv venv
+# Windows: venv\Scripts\activate
+# Mac/Linux: source venv/bin/activate
+pip install -r requirements.txt
+streamlit run src/web/web.py
